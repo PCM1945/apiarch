@@ -1,0 +1,17 @@
+services:
+  
+  rabbitmq:
+      build:
+        context: ./
+      container_name: PA-rabbitMQ
+      image: rabbitmq:3-management
+      restart: always
+      ports:
+        - "5672:5672"   
+        - "15672:15672"  
+      networks:
+        - api_network
+  
+networks:
+  api_network:
+    driver: bridge
