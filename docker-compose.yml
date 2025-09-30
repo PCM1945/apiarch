@@ -12,6 +12,8 @@ services:
     volumes:
       - rabbitmq_data:/var/lib/rabbitmq  # persistência dos dados
 
+    restart: always
+
 volumes:
   rabbitmq_data:
     driver: local
