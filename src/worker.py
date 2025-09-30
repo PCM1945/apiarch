@@ -25,8 +25,8 @@ class DefaultRequestProcessor(RequestProcessor):
     
     def __init__(self, base_api_url: str = "http://localhost:8009"):
         self.base_api_url = base_api_url
-    
-    async def process_request(self, payload: Dict[str, Any]) -> Dict[str, Any]:
+        
+    async def process_request(self, payload: Dict[str, Any], kind: str) -> Dict[str, Any]:
         """
         Process request by making HTTP call to API.
         
@@ -50,14 +50,23 @@ class DefaultRequestProcessor(RequestProcessor):
             logger.info(f"Making request to {self.base_api_url + api_url}")
             async with aiohttp.ClientSession() as session:
                 headers = {"Content-Type": "application/json"}
-                async with session.post(
-                    self.base_api_url + api_url,
-                    data=json.dumps(api_payload),
-                    headers=headers
-                ) as resp:
-                    data = await resp.json()
-                    logger.info(f"Received data from API: {data}")
-                    return data
+                if kind == "GET":
+                    async with session.get(
+                        self.base_api_url + api_url,
+                        params=api_payload
+                    ) as resp:
+                        data = await resp.json()
+                        logger.info(f"Received data from API: {data}")
+                        return data
+                if kind == "POST":
+                    async with session.post(
+                        self.base_api_url + api_url,
+                        data=json.dumps(api_payload),
+                        headers=headers
+                    ) as resp:
+                        data = await resp.json()
+                        logger.info(f"Received data from API: {data}")
+                        return data
         except Exception as e:
             logger.error(f"Error making API request: {e}")
             return {"error": str(e)}
