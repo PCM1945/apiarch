@@ -6,7 +6,7 @@ import aiohttp
 RABBIT_URL = "amqp://guest:guest@localhost/"
 REQUEST_QUEUE = "task_queue"
 BASE_API_URL = "http://localhost:8009"
-fg
+
 async def process_message(message: aio_pika.IncomingMessage, exchange: aio_pika.Exchange):
     async with message.process():
         payload = json.loads(message.body)
