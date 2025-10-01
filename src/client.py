@@ -11,13 +11,6 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 
-class MessageHandler(abc.ABC):
-    @abc.abstractmethod
-    async def handle_message(self, message: Dict[str, Any]) -> None:
-        """Processes the received message."""
-        pass
-
-
 class RabbitMQClient:
     """Reusable RabbitMQ client for asynchronous communication with workers."""
     
@@ -93,13 +86,8 @@ class RabbitMQClient:
             await self.callback_queue.consume(self._on_response)
             self._is_consuming = True
             logger.info("Started consuming responses")
-    
-    async def send_request(
-        self, 
-        api_url: str, 
-        data: Optional[Dict[str, Any]] = None,
-        response_handler: Optional[Callable] = None
-    ) -> str:
+            
+    async def send_request(self, api_url: str, data: Optional[Dict[str, Any]] = None, response_handler: Optional[Callable] = None) -> str:
         """
         Sends a request to the worker.
         
@@ -146,13 +134,8 @@ class RabbitMQClient:
         
         logger.info(f"Request sent - correlation_id: {correlation_id}, api_url: {api_url}")
         return correlation_id
-    
-    async def send_request_and_wait(
-        self, 
-        api_url: str, 
-        data: Optional[Dict[str, Any]] = None,
-        timeout: float = 30.0
-    ) -> Dict[str, Any]:
+
+    async def send_request_and_wait(self, api_url: str, data: Optional[Dict[str, Any]] = None, timeout: float = 30.0) -> Dict[str, Any]:
         """
         Sends a request and waits for response synchronously.
         
@@ -192,7 +175,11 @@ async def example_usage():
         # Example 1: Send request and wait for response
         response = await client.send_request_and_wait("/send", {"message": "Hello World"})
         print("Response received:", response)
-               
+        
+        # Example 2: Send request with custom handler
+        async def custom_handler(response):
+            print("Custom handler:", response)
+        
         await client.send_request("/send", {"message": "Async message"}, custom_handler)
         
         # Keep client running to receive asynchronous responses
