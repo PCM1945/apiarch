@@ -1,0 +1,37 @@
+import asyncio
+import aio_pika
+from protobuf import test_pb2 
+
+
+async def main():
+    connection = await aio_pika.connect_robust("amqp://guest:guest@localhost/")
+    async with connection:
+        channel = await connection.channel()
+
+        # Garantir que a fila existe
+        queue: aio_pika.Queue = await channel.declare_queue("user_created", durable=True)
+        await queue.bind("events", routing_key="user.created")
+        
+
+        # Callback para consumir mensagens
+        async def on_message(message: aio_pika.IncomingMessage):
+            async with message.process():  # auto-ack
+                try:
+                    msg = test_pb2.UserCreated()
+                    msg.ParseFromString(message.body)
+
+                    print("Mensagem recebida:")
+                    print(f" - user_id: {msg.user_id}")
+                    print(f" - email: {msg.email}")
+                    print(f" - created_at: {msg.created_at}")
+
+                except Exception as e:
+                    print("Erro ao decodificar:", e)
+
+        await queue.consume(on_message)
+
+        print("Aguardando mensagens...")
+        await asyncio.Future()  # trava para não sair
+
+if __name__ == "__main__":
+    asyncio.run(main())
