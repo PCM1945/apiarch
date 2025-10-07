@@ -1,0 +1,106 @@
+{
+  "vhosts": [
+    { "name": "/" }
+  ],
+  "users": [
+    {
+      "name": "guest",
+      "password": "guest",
+      "tags": "administrator"
+    }
+  ],
+  "permissions": [
+    {
+      "user": "guest",
+      "vhost": "/",
+      "configure": ".*",
+      "write": ".*",
+      "read": ".*"
+    }
+  ],
+  "exchanges": [
+    {
+      "name": "task_exchange",
+      "vhost": "/",
+      "type": "direct",
+      "durable": true,
+      "auto_delete": false,
+      "internal": false,
+      "arguments": {}
+    },
+    {
+      "name": "dlx_exchange",
+      "vhost": "/",
+      "type": "direct",
+      "durable": true,
+      "auto_delete": false,
+      "internal": false,
+      "arguments": {}
+    },
+    {
+      "name": "event_exchange",
+      "vhost": "/",
+      "type": "topic",
+      "durable": true,
+      "auto_delete": false,
+      "internal": false,
+      "arguments": {}
+    }
+  ],
+  "queues": [
+    {
+      "name": "task_queue",
+      "vhost": "/",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {
+        "x-message-ttl": 30000,
+        "x-dead-letter-exchange": "dlx_exchange",
+        "x-dead-letter-routing-key": "dlx_key"
+      }
+    },
+    {
+        "name": "response_queue",
+        "vhost": "/",
+        "durable": true,
+        "auto_delete": false,
+        "arguments": {
+            "x-message-ttl": 60000,
+            "x-dead-letter-exchange": "dlx_exchange",
+            "x-dead-letter-routing-key": "dlx_key"
+        }
+    },
+    {
+      "name": "dlx_queue",
+      "vhost": "/",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {}
+    },
+    {
+      "name": "event_queue",
+      "vhost": "/",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {}
+    }
+  ],
+  "bindings": [
+    {
+      "source": "task_exchange",
+      "vhost": "/",
+      "destination": "task_queue",
+      "destination_type": "queue",
+      "routing_key": "task_response",
+      "arguments": {}
+    },
+    {
+      "source": "dlx_exchange",
+      "vhost": "/",
+      "destination": "dlx_queue",
+      "destination_type": "queue",
+      "routing_key": "dlx_key",
+      "arguments": {}
+    }
+  ]
+}
