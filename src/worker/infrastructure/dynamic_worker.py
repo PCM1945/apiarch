@@ -12,21 +12,25 @@ class DynamicWorker(MessageBroker):
         self.connection = None
         self.channel = None
 
-        self.exchange_name = "requests_exchange"
+        self.task_exchange = "task_exchange"
+        self.task_exchange = "task_exchange"
+        self.task_queue_name = "task_queue"
 
     async def connect(self):
         """Estabelece conexão com RabbitMQ e configura filas e exchanges dinamicamente."""
         self.connection = await aio_pika.connect_robust(self.amqp_url)
         self.channel = await self.connection.channel()
 
-        self.exchange = await self.channel.declare_exchange(
-            self.exchange_name, ExchangeType.TOPIC
+        self.request_exchange = await self.channel.declare_exchange(
+            self.task_exchange, ExchangeType.TOPIC
         )
 
-        self.queue = await self.channel.declare_queue("worker.dynamic", durable=True)
+        self.task_exchange = await self.channel.declare_exchange(self.task_exchange, ExchangeType.TOPIC)
+
+        self.queue = await self.channel.declare_queue(self.task_queue_name, durable=True)
 
         for key in self.routing_keys:
-            await self.queue.bind(self.exchange, routing_key=f"task.{key}")
+            await self.queue.bind(self.task_exchange, routing_key=f"task.{key}")
 
     async def publish(self, message: Message, routing_key: str):
         response = aio_pika.Message(
