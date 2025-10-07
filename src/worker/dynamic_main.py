@@ -1,20 +1,16 @@
 import asyncio
 import logging
-from infrastructure.rabbitmq_worker import RabbitMQWorker
-from application.worker_service import WorkerService
+from infrastructure.dynamic_worker import DynamicWorker as RabbitMQWorker
+from application.dynamic_worker_service import WorkerService
 
 """Worker dinâmico que processa mensagens conforme o routing_key."""
 """Aqui você escolhe quais routing keys esse worker deve escutar — pode ser todas ou apenas algumas."""
-
-logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
-)
 
 async def main():
     routing_keys = [
         "ai.summary.generate_summary_text",
         "ai.summary.generate_summary_miro",
+        "app.show_message"
     ]
 
     broker = RabbitMQWorker(

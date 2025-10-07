@@ -1,4 +1,4 @@
-from base import BaseUseCase
+from .base_use_case import BaseUseCase
 
 class SummarizeTextUseCase(BaseUseCase):
     async def execute(self, data: str) -> str:

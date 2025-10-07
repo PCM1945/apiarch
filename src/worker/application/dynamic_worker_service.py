@@ -1,3 +1,4 @@
+import json
 import logging
 from domain.interfaces import Message, MessageBroker
 from application.registry import UseCaseRegistry
@@ -16,16 +17,23 @@ class WorkerService:
         await self.broker.consume(self._handle_message)
 
     async def _handle_message(self, message: Message):
-        logger.info(f"[Worker] Mensagem recebida: {message.body}")
+
+        logger.info(f"[Worker] Mensagem recebida: {message}")
 
         try:
             use_case = UseCaseRegistry.get_use_case(message.reply_to)
-            result = await use_case.execute(message.body)
 
-            response = Message(result, message.correlation_id, message.reply_to)
+            result = await use_case.execute(message.body)
+            
+            response = Message(
+                body=json.dumps(result),
+                correlation_id=message.correlation_id,
+                reply_to=message.reply_to
+            )
+
             await self.broker.publish(response, routing_key=message.reply_to)
 
             logger.info(f"[Worker] Resposta enviada para {message.reply_to}")
 
         except Exception as e:
-            logger.error(f"Erro ao processar mensagem: {e}", exc_info=True)
+            logger.error(f"Erro ao processar mensagem: {e}")
