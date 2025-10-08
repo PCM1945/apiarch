@@ -1,6 +1,10 @@
 import aio_pika
 from aio_pika import ExchangeType
 from domain.interfaces import Message, MessageBroker
+from utils.logger import AppLogger
+
+logger = AppLogger(__name__)
+
 
 class DynamicWorker(MessageBroker):
     """Adapter RabbitMQ que escuta múltiplas routing keys."""
@@ -21,31 +25,42 @@ class DynamicWorker(MessageBroker):
         self.connection = await aio_pika.connect_robust(self.amqp_url)
         self.channel = await self.connection.channel()
 
-        self.request_exchange = await self.channel.declare_exchange(
-            self.task_exchange, ExchangeType.TOPIC
+        self.task_exchange = await self.channel.declare_exchange(self.task_exchange, ExchangeType.TOPIC, durable=True)
+
+        self.task_queue = await self.channel.declare_queue(
+            self.task_queue_name, durable=True,
+            arguments={
+                "x-message-ttl": 30000,
+                "x-dead-letter-exchange": "dlx_exchange",
+                "x-dead-letter-routing-key": "dlx_key"
+            }
         )
 
-        self.task_exchange = await self.channel.declare_exchange(self.task_exchange, ExchangeType.TOPIC)
 
-        self.queue = await self.channel.declare_queue(self.task_queue_name, durable=True)
+        # self.dlx_exchange = await self.channel.declare_exchange("dlx_exchange", ExchangeType.FANOUT, durable=True)
+        # self.dlx_queue = await self.channel.declare_queue("dlx_queue", durable=True)
+        # await self.dlx_queue.bind(self.dlx_exchange)
 
         for key in self.routing_keys:
-            await self.queue.bind(self.task_exchange, routing_key=f"task.{key}")
+            await self.task_queue.bind(self.task_exchange, routing_key=f"task.{key}")
+
 
     async def publish(self, message: Message, routing_key: str):
         response = aio_pika.Message(
             body=message.body.encode(),
             correlation_id=message.correlation_id,
         )
-        await self.exchange.publish(response, routing_key=routing_key)
+        await self.task_exchange.publish(response, routing_key=routing_key)
 
     async def consume(self, callback):
-        async with self.queue.iterator() as queue_iter:
+        async with self.task_queue.iterator() as queue_iter:
             async for msg in queue_iter:
                 async with msg.process():
+                    logger.info(f" crude Message received: {msg}") 
                     message = Message(
                         body=msg.body.decode(),
-                        correlation_id=msg.correlation_id or "",
-                        reply_to=msg.reply_to or "",
+                        routing_key=msg.routing_key,
+                        correlation_id=msg.correlation_id,
+                        reply_to=msg.reply_to,
                     )
                     await callback(message)

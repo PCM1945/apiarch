@@ -22,7 +22,7 @@
     {
       "name": "task_exchange",
       "vhost": "/",
-      "type": "direct",
+      "type": "topic",
       "durable": true,
       "auto_delete": false,
       "internal": false,
@@ -31,7 +31,7 @@
     {
       "name": "dlx_exchange",
       "vhost": "/",
-      "type": "direct",
+      "type": "topic",
       "durable": true,
       "auto_delete": false,
       "internal": false,
@@ -99,7 +99,7 @@
       "vhost": "/",
       "destination": "dlx_queue",
       "destination_type": "queue",
-      "routing_key": "dlx_key",
+      "routing_key": "*.dlx",
       "arguments": {}
     }
   ]

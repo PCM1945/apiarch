@@ -52,8 +52,8 @@ async def send_message(message: MessageModel) -> Dict[str, Any]:
 
     print(f"Received message from {message.sender}: {message.message}")
 
-    # Simulate processing time (2 seconds delay for message processing)
-    await asyncio.sleep(2.0)
+    # Simulate processing time (5 seconds delay for message processing simulation)
+    await asyncio.sleep(5.0)
     
     return {
         "status": "success",

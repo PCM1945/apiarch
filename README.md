@@ -10,5 +10,5 @@ pip install protobuf
 # protobuf 
 to generate the compiled protobuf code use the following command 
 ´´´proto
-protoc --python_out="exit_path" "python_file_path"
+protoc --python_out="exit_path" "proto_file_path"
 ´´´

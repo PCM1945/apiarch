@@ -1,0 +1,22 @@
+{
+    "app_id": null,
+    "body_size": 46,
+    "cluster_id": "",
+    "consumer_tag": "ctag1.8e0407f26aa144af89d381982f090981",
+    "content_encoding": null,
+    "content_type": null,
+    "correlation_id": null,
+    "delivery_mode": 2,
+    "delivery_tag": 1,
+    "exchange": "task_exchange",
+    "expiration": null,
+    "headers": {},
+    "message_id": null,
+    "priority": 0,
+    "redelivered": false,
+    "reply_to": null,
+    "routing_key": "task.ai.summary.generate_summary_text",
+    "timestamp": null,
+    "type": "None",
+    "user_id": null
+}

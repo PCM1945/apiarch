@@ -1,7 +1,8 @@
 syntax = "proto3";
 
-message UserCreated {
-  string user_id = 1;
-  string email = 2;
+message chatMessage {
+  string correlation_id = 1;
+  string message = 2;
   string created_at = 3;
+  string reply_to = 4;
 }

@@ -5,6 +5,7 @@ from pydantic import BaseModel
 class Message(BaseModel):
     """Simple entity that carries request data."""
     body: str
+    routing_key: Optional[str] = None
     correlation_id: str
     reply_to: str
     header: Optional[dict] = {}

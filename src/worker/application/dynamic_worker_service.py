@@ -7,21 +7,21 @@ from utils.logger import AppLogger
 logger = AppLogger(__name__)
 
 class WorkerService:
-    """Processa mensagens dinamicamente conforme o routing_key."""
+    """Processes messages dynamically based on the routing_key."""
 
     def __init__(self, broker: MessageBroker):
         self.broker = broker
 
     async def start(self):
-        logger.info("Worker dinâmico iniciado. Aguardando mensagens...")
+        logger.info("Dynamic worker started. Waiting for messages...")
         await self.broker.consume(self._handle_message)
 
     async def _handle_message(self, message: Message):
 
-        logger.info(f"[Worker] Mensagem recebida: {message}")
+        logger.info(f"[Worker] Message received: {message}")
 
         try:
-            use_case = UseCaseRegistry.get_use_case(message.reply_to)
+            use_case = UseCaseRegistry.get_use_case(message.routing_key)
 
             result = await use_case.execute(message.body)
             
@@ -33,7 +33,7 @@ class WorkerService:
 
             await self.broker.publish(response, routing_key=message.reply_to)
 
-            logger.info(f"[Worker] Resposta enviada para {message.reply_to}")
+            logger.info(f"[Worker] Response sent to {message.reply_to}")
 
         except Exception as e:
-            logger.error(f"Erro ao processar mensagem: {e}")
+            logger.error(f"Error processing message: {e}")
