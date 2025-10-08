@@ -7,7 +7,7 @@ logger = AppLogger(__name__)
 
 
 class DynamicWorker(MessageBroker):
-    """Adapter RabbitMQ que escuta múltiplas routing keys."""
+    """RabbitMQ adapter that listens to multiple routing keys."""
 
     def __init__(self, amqp_url: str, routing_keys: list[str]):
         
@@ -21,7 +21,7 @@ class DynamicWorker(MessageBroker):
         self.task_queue_name = "task_queue"
 
     async def connect(self):
-        """Estabelece conexão com RabbitMQ e configura filas e exchanges dinamicamente."""
+        """Establishes connection with RabbitMQ and configures queues and exchanges dynamically."""
         self.connection = await aio_pika.connect_robust(self.amqp_url)
         self.channel = await self.connection.channel()
 
@@ -36,14 +36,12 @@ class DynamicWorker(MessageBroker):
             }
         )
 
-
         # self.dlx_exchange = await self.channel.declare_exchange("dlx_exchange", ExchangeType.FANOUT, durable=True)
         # self.dlx_queue = await self.channel.declare_queue("dlx_queue", durable=True)
         # await self.dlx_queue.bind(self.dlx_exchange)
 
         for key in self.routing_keys:
             await self.task_queue.bind(self.task_exchange, routing_key=f"task.{key}")
-
 
     async def publish(self, message: Message, routing_key: str):
         response = aio_pika.Message(
@@ -56,7 +54,7 @@ class DynamicWorker(MessageBroker):
         async with self.task_queue.iterator() as queue_iter:
             async for msg in queue_iter:
                 async with msg.process():
-                    logger.info(f" crude Message received: {msg}") 
+                    logger.info(f"Crude Message received: {msg}") 
                     message = Message(
                         body=msg.body.decode(),
                         routing_key=msg.routing_key,

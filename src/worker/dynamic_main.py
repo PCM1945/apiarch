@@ -3,8 +3,8 @@ import logging
 from infrastructure.dynamic_worker import DynamicWorker as RabbitMQWorker
 from application.dynamic_worker_service import WorkerService
 
-"""Worker dinâmico que processa mensagens conforme o routing_key."""
-"""Aqui você escolhe quais routing keys esse worker deve escutar — pode ser todas ou apenas algumas."""
+"""Dynamic worker that processes messages according to the routing_key."""
+"""Here you choose which routing keys this worker should listen to — can be all or just some."""
 
 async def main():
     routing_keys = [

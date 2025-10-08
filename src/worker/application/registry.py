@@ -5,7 +5,7 @@ from domain.use_cases.show_message import ShowMessageUseCase
 from domain.use_cases.summarize_meeting import SummarizeMeetingUseCase  
 
 class UseCaseRegistry:
-    """Mapeia routing keys para casos de uso específicos."""
+    """Maps routing keys to specific use cases."""
 
     _registry: Dict[str, Type[BaseUseCase]] = {
         "task.ai.summary.generate_summary_text": SummarizeTextUseCase,
@@ -17,5 +17,5 @@ class UseCaseRegistry:
     def get_use_case(cls, routing_key: str) -> BaseUseCase:
         use_case_cls = cls._registry.get(routing_key)
         if not use_case_cls:
-            raise ValueError(f"Nenhum caso de uso registrado para '{routing_key}'")
+            raise ValueError(f"No use case registered for '{routing_key}'")
         return use_case_cls()
